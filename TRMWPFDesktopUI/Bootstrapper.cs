@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using TRMWPFDesktopUI.Helpers;
 using TRMWPFDesktopUI.ViewModels;
 
 namespace TRMWPFDesktopUI
@@ -16,6 +18,11 @@ namespace TRMWPFDesktopUI
         public Bootstrapper()
         {
             Initialize();
+
+            ConventionManager.AddElementConvention<PasswordBox>(
+                PasswordBoxHelper.BoundPasswordProperty,
+                "Password",
+                "PasswordChanged");
         }
 
         //where the actual instantiation happenes.  
@@ -30,7 +37,8 @@ namespace TRMWPFDesktopUI
             //One piece can raise and event and another piece can react to it. 
             _container
                 .Singleton<IWindowManager, WindowManager>()
-                .Singleton<IEventAggregator, EventAggregator>();
+                .Singleton<IEventAggregator, EventAggregator>()
+                .Singleton<IAPIHelper, APIHelper>();
             //singleton means create one instance of the class for the scope of the container/application
             //ShellViewModel asks for an EventAggregator, it will get the first EventAggregator.
             //If another one asks for it, the same one is returned.
