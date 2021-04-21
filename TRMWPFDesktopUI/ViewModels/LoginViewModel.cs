@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TRMWPFDesktopUI.Helpers;
+using TRMWPFDesktopUI.Library.Api;
 
 namespace TRMWPFDesktopUI.ViewModels
 {
@@ -42,6 +43,34 @@ namespace TRMWPFDesktopUI.ViewModels
             }
         }
 
+        public bool IsErrorVisible
+        {
+            get 
+            {
+                bool output = false;
+                if (ErrorMessage?.Length > 0)
+                {
+                    output = true;
+                }
+                return output; 
+            }
+           
+        }
+
+        private string _errorMessage;
+
+        public string ErrorMessage
+        {
+            get { return _errorMessage; }
+            set
+            {                
+                _errorMessage = value; 
+                NotifyOfPropertyChange(() => ErrorMessage);
+                NotifyOfPropertyChange(() => IsErrorVisible);
+            }
+        }
+
+
         public bool CanLogIn
         //enable/disable the login button
         //need to look at this to mkae password box work:
@@ -66,11 +95,15 @@ namespace TRMWPFDesktopUI.ViewModels
             try
             {
                 var result = await _apiHelper.Authenticate(UserName, Password);
+                ErrorMessage = ""; //no error on success
+
+                //capture more information about the user. 
+                await _apiHelper.GetLoggedInUserInfo(result.Access_Token);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 //bad response from Authenticate(), such as bad name and password
-                Console.WriteLine();
+                ErrorMessage = ex.Message;
             }
         }
     }

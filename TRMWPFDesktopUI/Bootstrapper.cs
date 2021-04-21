@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using TRMWPFDesktopUI.Helpers;
+using TRMWPFDesktopUI.Library.Api;
+using TRMWPFDesktopUI.Library.Models;
 using TRMWPFDesktopUI.ViewModels;
 
 namespace TRMWPFDesktopUI
@@ -38,7 +40,8 @@ namespace TRMWPFDesktopUI
             _container
                 .Singleton<IWindowManager, WindowManager>()
                 .Singleton<IEventAggregator, EventAggregator>()
-                .Singleton<IAPIHelper, APIHelper>();
+                .Singleton<IAPIHelper, APIHelper>()
+                .Singleton<ILoggedInUserModel, LoggedInUserModel>();
             //singleton means create one instance of the class for the scope of the container/application
             //ShellViewModel asks for an EventAggregator, it will get the first EventAggregator.
             //If another one asks for it, the same one is returned.
