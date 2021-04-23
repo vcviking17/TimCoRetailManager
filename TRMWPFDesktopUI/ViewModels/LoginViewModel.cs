@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TRMWPFDesktopUI.EventModels;
 using TRMWPFDesktopUI.Helpers;
 using TRMWPFDesktopUI.Library.Api;
 
@@ -14,11 +15,13 @@ namespace TRMWPFDesktopUI.ViewModels
         private string _userName;
         private string _password;
         private IAPIHelper _apiHelper;
+        IEventAggregator _events;
 
         //dependency injection to say I need it and assign it. 
-        public LoginViewModel(IAPIHelper apiHelper)
+        public LoginViewModel(IAPIHelper apiHelper, IEventAggregator events)
         {
             _apiHelper = apiHelper;
+            _events = events;
         }
         //match the names on the LoginView
         public string UserName
@@ -99,6 +102,8 @@ namespace TRMWPFDesktopUI.ViewModels
 
                 //capture more information about the user. 
                 await _apiHelper.GetLoggedInUserInfo(result.Access_Token);
+
+                _events.PublishOnUIThread(new LogOnEvent());//this broadcasts the event.
             }
             catch (Exception ex)
             {
