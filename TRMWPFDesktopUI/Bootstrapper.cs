@@ -33,7 +33,8 @@ namespace TRMWPFDesktopUI
         protected override void Configure()
         {
             //whenever we ask for a container instance, it will return the instance
-            _container.Instance(_container);
+            _container.Instance(_container)
+                .PerRequest<IProductEndpoint, ProductEndpoint>();
             //handle the idea of bringing windows in and out
             //can pass event messaging throughout the aplpication.
             //One piece can raise and event and another piece can react to it. 

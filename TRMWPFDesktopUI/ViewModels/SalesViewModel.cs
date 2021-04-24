@@ -5,15 +5,34 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TRMWPFDesktopUI.Library.Api;
+using TRMWPFDesktopUI.Library.Models;
 
 namespace TRMWPFDesktopUI.ViewModels
 {
     public  class SalesViewModel : Screen
     {
-        //listbox of products from SalesView
-        private BindingList<string> _products;
+        IProductEndpoint _productEndpoint;
+        public SalesViewModel(IProductEndpoint productEndpoint)
+        {
+            _productEndpoint = productEndpoint;
+        }
 
-        public BindingList<string> Products
+        //event for when the view is loaded
+        protected override async void OnViewLoaded(object view)
+        {
+            base.OnViewLoaded(view);
+            await LoadProducts();
+        }
+        private async Task LoadProducts()
+        {
+            var productList = await _productEndpoint.GetAll();
+            Products = new BindingList<ProductModel>(productList);
+        }
+        //listbox of products from SalesView
+        private BindingList<ProductModel> _products;
+
+        public BindingList<ProductModel> Products
         {
             get { return _products; }
             set 
