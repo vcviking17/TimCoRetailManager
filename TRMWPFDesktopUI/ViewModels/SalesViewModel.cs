@@ -42,9 +42,23 @@ namespace TRMWPFDesktopUI.ViewModels
             }
         }
 
-        private BindingList<string> _cart;
+        private ProductModel _selectedProduct;
 
-        public BindingList<string> Cart
+        public ProductModel SelectedProduct
+        {
+            get { return _selectedProduct; }
+            set 
+            { 
+                _selectedProduct = value;
+                NotifyOfPropertyChange(() => SelectedProduct);
+                NotifyOfPropertyChange(() => CanAddToCart);  //When the item quantity changes, check the value
+            }
+        }
+
+
+        private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>();
+
+        public BindingList<CartItemModel> Cart
         {
             get { return _cart; }
             set 
@@ -55,7 +69,7 @@ namespace TRMWPFDesktopUI.ViewModels
         }
 
 
-        private int _itemQuantity;
+        private int _itemQuantity = 1;
 
         public int ItemQuantity
         {
@@ -64,6 +78,7 @@ namespace TRMWPFDesktopUI.ViewModels
             { 
                 _itemQuantity = value;
                 NotifyOfPropertyChange(() => ItemQuantity);
+                NotifyOfPropertyChange(() => CanAddToCart);  //When the item quantity changes, check the value
             }
         }
 
@@ -71,7 +86,12 @@ namespace TRMWPFDesktopUI.ViewModels
         {
             get 
             {
-                return "$0.00";
+                decimal subTotal = 0;
+                foreach (var item in Cart)
+                {
+                    subTotal += (item.Product.RetailPrice * item.QuantityInCart);
+                }
+                return subTotal.ToString("C");
             }
         }
 
@@ -94,7 +114,30 @@ namespace TRMWPFDesktopUI.ViewModels
         //names taken from LoginView as a template
         public void AddToCart()
         {
+            //is there an item in the cart already for the selected one?
+            CartItemModel existingItem = Cart.FirstOrDefault(x => x.Product == SelectedProduct); //if item not found, it's null
 
+            if (existingItem != null)
+            {
+                existingItem.QuantityInCart += ItemQuantity; //add item quantitiy to existing quantity
+                //this is a memory location, so the change updates SelectedProduct as well
+                ////HACK to trick the system into updating the quantity on the screen - Will come back to this. 
+                Cart.Remove(existingItem);
+                Cart.Add(existingItem);
+            }
+            else
+            {
+                CartItemModel item = new CartItemModel
+                {
+                    Product = SelectedProduct,
+                    QuantityInCart = ItemQuantity
+                };
+                Cart.Add(item);  //add to listbox on UI
+            }
+                        
+            SelectedProduct.QuantityInStock -= ItemQuantity;
+            ItemQuantity = 1;  //default item quantity in text box
+            NotifyOfPropertyChange(() => SubTotal);
         }
 
         public bool CanAddToCart
@@ -105,17 +148,22 @@ namespace TRMWPFDesktopUI.ViewModels
 
                 //make sure something is selected
                 //make sure there is an item quantity
+                if (ItemQuantity > 0 && SelectedProduct?.QuantityInStock >= ItemQuantity)  //if null, skip the if
+                {
+                    output = true;
+                }
 
                 return output; 
             }
         }
 
-        public void RemoveFromToCart()
+        public void RemoveFromCart()
         {
 
+            NotifyOfPropertyChange(() => SubTotal);
         }
 
-        public bool CanRemoveFromToCart
+        public bool CanRemoveFromCart
         {
             get
             {
