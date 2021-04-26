@@ -117,14 +117,17 @@ namespace TRMWPFDesktopUI.ViewModels
         {
             decimal taxAmount = 0;
             decimal taxRate = _configHelper.GetTaxRate() / 100;
-            foreach (var item in Cart)
-            {
-                if (item.Product.IsTaxable)
-                {
-                    taxAmount += (item.Product.RetailPrice * item.QuantityInCart) *  taxRate;
-                    //can't multiple decimal and double since there are different precisions.
-                }
-            }
+            //foreach (var item in Cart)
+            //{
+            //    if (item.Product.IsTaxable)
+            //    {
+            //        taxAmount += (item.Product.RetailPrice * item.QuantityInCart) *  taxRate;
+            //        //can't multiple decimal and double since there are different precisions.
+            //    }
+            //}
+             taxAmount = Cart
+                .Where(x => x.Product.IsTaxable)
+                .Sum(x => x.Product.RetailPrice * x.QuantityInCart * taxRate);
             return taxAmount;
         }
 
