@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TRMWPFDesktopUI.Library.Api;
+using TRMWPFDesktopUI.Library.Helpers;
 using TRMWPFDesktopUI.Library.Models;
 
 namespace TRMWPFDesktopUI.ViewModels
@@ -13,9 +14,12 @@ namespace TRMWPFDesktopUI.ViewModels
     public  class SalesViewModel : Screen
     {
         IProductEndpoint _productEndpoint;
-        public SalesViewModel(IProductEndpoint productEndpoint)
+        IConfigHelper _configHelper;
+
+        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper)
         {
             _productEndpoint = productEndpoint;
+            _configHelper = configHelper;
         }
 
         //event for when the view is loaded
@@ -86,27 +90,50 @@ namespace TRMWPFDesktopUI.ViewModels
         {
             get 
             {
-                decimal subTotal = 0;
-                foreach (var item in Cart)
-                {
-                    subTotal += (item.Product.RetailPrice * item.QuantityInCart);
-                }
+                decimal subTotal = CalculateSubTotal();
                 return subTotal.ToString("C");
             }
+        }
+
+        private decimal CalculateSubTotal()
+        {
+            decimal subTotal = 0;
+            foreach (var item in Cart)
+            {
+                subTotal += (item.Product.RetailPrice * item.QuantityInCart);
+            }
+            return subTotal;
         }
 
         public string Tax        {
             get
             {
-                return "$0.00";
+                decimal taxAmount = CalculateTax();
+                return taxAmount.ToString("C");  //there could be issues with rounding.  Add all subtotals then calculate tax or tax on each item?
             }
+        }
+
+        private decimal CalculateTax()
+        {
+            decimal taxAmount = 0;
+            decimal taxRate = _configHelper.GetTaxRate() / 100;
+            foreach (var item in Cart)
+            {
+                if (item.Product.IsTaxable)
+                {
+                    taxAmount += (item.Product.RetailPrice * item.QuantityInCart) *  taxRate;
+                    //can't multiple decimal and double since there are different precisions.
+                }
+            }
+            return taxAmount;
         }
 
         public string Total
         {
             get
             {
-                return "$0.00";
+                decimal total = CalculateSubTotal() + CalculateTax();
+                return total.ToString("C");
             }
         }
 
@@ -138,6 +165,8 @@ namespace TRMWPFDesktopUI.ViewModels
             SelectedProduct.QuantityInStock -= ItemQuantity;
             ItemQuantity = 1;  //default item quantity in text box
             NotifyOfPropertyChange(() => SubTotal);
+            NotifyOfPropertyChange(() => Tax);
+            NotifyOfPropertyChange(() => Total);
         }
 
         public bool CanAddToCart
@@ -161,6 +190,8 @@ namespace TRMWPFDesktopUI.ViewModels
         {
 
             NotifyOfPropertyChange(() => SubTotal);
+            NotifyOfPropertyChange(() => Tax);
+            NotifyOfPropertyChange(() => Total);
         }
 
         public bool CanRemoveFromCart
