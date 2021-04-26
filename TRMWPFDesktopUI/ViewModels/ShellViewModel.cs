@@ -16,20 +16,21 @@ namespace TRMWPFDesktopUI.ViewModels
         private LoginViewModel _loginVM;
         private IEventAggregator _events;
         private SalesViewModel _salesVM;
-        private SimpleContainer _container;
+        //private SimpleContainer _container;
 
         public ShellViewModel(LoginViewModel loginVM, IEventAggregator events, SalesViewModel salesVM, SimpleContainer container)
         {
             _events = events;
             _loginVM = loginVM; //constructor injection
             _salesVM = salesVM;
-            _container = container;
+            //_container = container;
 
             _events.Subscribe(this);  //“this” represents the current instance of this class.  You have to tell it who is subscribing (this).
                                       //When an event happens, I’m going to send the event to subscribers, even if they aren’t listening for that event. 
 
             // ActivateItem(_loginVM); //activate the login on the ShellView
-            ActivateItem(_container.GetInstance<LoginViewModel>());  //get a new instance of it and put it in _loginVM to wipe out _loginVM without any data
+            //ActivateItem(_container.GetInstance<LoginViewModel>());  //get a new instance of it and put it in _loginVM to wipe out _loginVM without any data
+            ActivateItem(IoC.Get<LoginViewModel>());  //Do it this way and we don't need the container in dependency injection (Caliburn Micro)
         }
 
         public void Handle(LogOnEvent message)
