@@ -1,4 +1,5 @@
-﻿using Caliburn.Micro;
+﻿using AutoMapper;
+using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ using TRMWPFDesktopUI.Helpers;
 using TRMWPFDesktopUI.Library.Api;
 using TRMWPFDesktopUI.Library.Helpers;
 using TRMWPFDesktopUI.Library.Models;
+using TRMWPFDesktopUI.Models;
 using TRMWPFDesktopUI.ViewModels;
 
 namespace TRMWPFDesktopUI
@@ -28,11 +30,29 @@ namespace TRMWPFDesktopUI
                 "PasswordChanged");
         }
 
+        private IMapper ConfigureAutoMapper()
+        {
+            //Configure AutoMapper
+            //In AutoMapper, it's going to know how to map a ProductModel to a ProductDisplayModel
+            //It will use some reflexion to figure it out.
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<ProductModel, ProductDisplayModel>();
+                cfg.CreateMap<CartItemModel, CartItemDisplayModel>();
+            });
+
+            var output = config.CreateMapper();
+            return output;
+        }
+
         //where the actual instantiation happenes.  
         //where the container knows hat to connect to what
         //Configure() gets run once at the beginning of the application.
         protected override void Configure()
         {
+            _container.Instance(ConfigureAutoMapper()); //put this mapper instance into our container.
+
+
             //whenever we ask for a container instance, it will return the instance
             _container.Instance(_container)
                 .PerRequest<IProductEndpoint, ProductEndpoint>()

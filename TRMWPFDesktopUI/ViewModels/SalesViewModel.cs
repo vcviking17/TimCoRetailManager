@@ -1,4 +1,5 @@
-﻿using Caliburn.Micro;
+﻿using AutoMapper;
+using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using TRMWPFDesktopUI.Library.Api;
 using TRMWPFDesktopUI.Library.Helpers;
 using TRMWPFDesktopUI.Library.Models;
+using TRMWPFDesktopUI.Models;
 
 namespace TRMWPFDesktopUI.ViewModels
 {
@@ -16,12 +18,15 @@ namespace TRMWPFDesktopUI.ViewModels
         IProductEndpoint _productEndpoint;
         ISaleEndpoint _saleEndpoint;
         IConfigHelper _configHelper;
+        IMapper _mapper;
 
-        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint)
+        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint,
+            IMapper mapper)
         {
             _productEndpoint = productEndpoint;
             _configHelper = configHelper;
             _saleEndpoint = saleEndpoint;
+            _mapper = mapper;
         }
 
         //event for when the view is loaded
@@ -33,12 +38,16 @@ namespace TRMWPFDesktopUI.ViewModels
         private async Task LoadProducts()
         {
             var productList = await _productEndpoint.GetAll();
-            Products = new BindingList<ProductModel>(productList);
+            //Products = new BindingList<ProductModel>(productList);
+            var products = _mapper.Map<List<ProductDisplayModel>>(productList);
+            //this will map the productlist to a productDisplayModel.
+            Products = new BindingList<ProductDisplayModel>(products);
+
         }
         //listbox of products from SalesView
-        private BindingList<ProductModel> _products;
+        private BindingList<ProductDisplayModel> _products;
 
-        public BindingList<ProductModel> Products
+        public BindingList<ProductDisplayModel> Products
         {
             get { return _products; }
             set 
@@ -48,9 +57,9 @@ namespace TRMWPFDesktopUI.ViewModels
             }
         }
 
-        private ProductModel _selectedProduct;
+        private ProductDisplayModel _selectedProduct;
 
-        public ProductModel SelectedProduct
+        public ProductDisplayModel SelectedProduct
         {
             get { return _selectedProduct; }
             set 
@@ -62,9 +71,9 @@ namespace TRMWPFDesktopUI.ViewModels
         }
 
 
-        private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>();
+        private BindingList<CartItemDisplayModel> _cart = new BindingList<CartItemDisplayModel>();
 
-        public BindingList<CartItemModel> Cart
+        public BindingList<CartItemDisplayModel> Cart
         {
             get { return _cart; }
             set 
@@ -147,19 +156,20 @@ namespace TRMWPFDesktopUI.ViewModels
         public void AddToCart()
         {
             //is there an item in the cart already for the selected one?
-            CartItemModel existingItem = Cart.FirstOrDefault(x => x.Product == SelectedProduct); //if item not found, it's null
+            CartItemDisplayModel existingItem = Cart.FirstOrDefault(x => x.Product == SelectedProduct); //if item not found, it's null
 
             if (existingItem != null)
             {
                 existingItem.QuantityInCart += ItemQuantity; //add item quantitiy to existing quantity
                 //this is a memory location, so the change updates SelectedProduct as well
                 ////HACK to trick the system into updating the quantity on the screen - Will come back to this. 
-                Cart.Remove(existingItem);
-                Cart.Add(existingItem);
+                //Cart.Remove(existingItem);
+                //Cart.Add(existingItem);
+
             }
             else
             {
-                CartItemModel item = new CartItemModel
+                CartItemDisplayModel item = new CartItemDisplayModel
                 {
                     Product = SelectedProduct,
                     QuantityInCart = ItemQuantity
