@@ -5,12 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TRMWPFDesktopUI.Library.Helpers
+namespace TimCoreyRetailManagerGood.Library
 {
-    public class ConfigHelper : IConfigHelper
-    {
-        //TODO: Move this from config to the API
-        public decimal GetTaxRate()
+    public class ConfigHelper
+    {        
+        public static decimal GetTaxRate()
         {
             decimal output = 0;
 
@@ -24,6 +23,6 @@ namespace TRMWPFDesktopUI.Library.Helpers
             }
 
             return output;
-        }
+        }     
     }
 }

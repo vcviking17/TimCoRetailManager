@@ -18,5 +18,15 @@ namespace TimCoreyRetailManagerGood.Library.Internal.DataAccess
 
             return output;
         }
+
+        public ProductModel GetProductById(int productId)
+        {
+            SqlDataAccess sql = new SqlDataAccess();
+
+            //dynamic is a trick we can use since it's the same assembly
+            var output = sql.LoadData<ProductModel, dynamic>("dbo.sp_Product_GetById", new { Id = productId }, "TRMData").FirstOrDefault();
+
+            return output;
+        }
     }
 }

@@ -14,12 +14,14 @@ namespace TRMWPFDesktopUI.ViewModels
     public  class SalesViewModel : Screen
     {
         IProductEndpoint _productEndpoint;
+        ISaleEndpoint _saleEndpoint;
         IConfigHelper _configHelper;
 
-        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper)
+        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint)
         {
             _productEndpoint = productEndpoint;
             _configHelper = configHelper;
+            _saleEndpoint = saleEndpoint;
         }
 
         //event for when the view is loaded
@@ -170,6 +172,7 @@ namespace TRMWPFDesktopUI.ViewModels
             NotifyOfPropertyChange(() => SubTotal);
             NotifyOfPropertyChange(() => Tax);
             NotifyOfPropertyChange(() => Total);
+            NotifyOfPropertyChange(() => CanCheckOut);
         }
 
         public bool CanAddToCart
@@ -195,6 +198,7 @@ namespace TRMWPFDesktopUI.ViewModels
             NotifyOfPropertyChange(() => SubTotal);
             NotifyOfPropertyChange(() => Tax);
             NotifyOfPropertyChange(() => Total);
+            NotifyOfPropertyChange(() => CanCheckOut);
         }
 
         public bool CanRemoveFromCart
@@ -209,9 +213,21 @@ namespace TRMWPFDesktopUI.ViewModels
             }
         }
 
-        public void CheckOut()
+        public async Task CheckOut()
         {
-
+            //Create a SaleModel and POST to the API
+            SaleModel sale = new SaleModel();
+            foreach (var item in Cart)
+            {
+                sale.SaleDetails.Add(new SaleDetailModel
+                {
+                    ProductId = item.Product.Id,
+                    Quantity = item.QuantityInCart
+                });               
+            }
+            //now the cart is converted from a cartitem list to a SaleModel
+            //POST to the API.
+            await _saleEndpoint.PostSale(sale);
         }
 
         public bool CanCheckOut
@@ -220,7 +236,10 @@ namespace TRMWPFDesktopUI.ViewModels
             {
                 bool output = false;
 
-                //make sure something is in the cart
+                if (Cart.Count > 0)
+                {
+                    output = true;
+                }
 
                 return output;
             }
