@@ -23,6 +23,7 @@ namespace TRMWPFDesktopUI.ViewModels
         public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint,
             IMapper mapper)
         {
+            //on the contructor, load the items from dependency injection system
             _productEndpoint = productEndpoint;
             _configHelper = configHelper;
             _saleEndpoint = saleEndpoint;
@@ -33,7 +34,7 @@ namespace TRMWPFDesktopUI.ViewModels
         protected override async void OnViewLoaded(object view)
         {
             base.OnViewLoaded(view);
-            await LoadProducts();
+            await LoadProducts(); //load products when the view is loaded
         }
         private async Task LoadProducts()
         {
@@ -71,6 +72,21 @@ namespace TRMWPFDesktopUI.ViewModels
         }
 
         private CartItemDisplayModel _selectedCartItem;
+
+        private async Task ResetSalesViewModel()
+        {
+            Cart = new BindingList<CartItemDisplayModel>(); //use the property not internal variable so notify of propertychanges work
+
+            //TODO: add clearing selectedCartItem if it doesn't do it itself. 
+            await LoadProducts();
+
+            //needed to reset the numbers after clearing the cart out
+            NotifyOfPropertyChange(() => SubTotal);
+            NotifyOfPropertyChange(() => Tax);
+            NotifyOfPropertyChange(() => Total);
+            NotifyOfPropertyChange(() => CanCheckOut);
+            NotifyOfPropertyChange(() => CanAddToCart);
+        }
 
         public CartItemDisplayModel SelectedCartItem
         {
@@ -230,6 +246,7 @@ namespace TRMWPFDesktopUI.ViewModels
             NotifyOfPropertyChange(() => Tax);
             NotifyOfPropertyChange(() => Total);
             NotifyOfPropertyChange(() => CanCheckOut);
+            NotifyOfPropertyChange(() => CanAddToCart);
         }
 
         public bool CanRemoveFromCart
@@ -240,7 +257,7 @@ namespace TRMWPFDesktopUI.ViewModels
 
                 //make sure something is selected
                 
-                if (SelectedCartItem != null  && SelectedCartItem.Product.QuantityInStock > 0)  
+                if (SelectedCartItem != null  && SelectedCartItem.QuantityInCart > 0)  
                 {
                     output = true;
                 }
@@ -264,6 +281,8 @@ namespace TRMWPFDesktopUI.ViewModels
             //now the cart is converted from a cartitem list to a SaleModel
             //POST to the API.
             await _saleEndpoint.PostSale(sale);
+
+            await ResetSalesViewModel();
         }
 
         public bool CanCheckOut

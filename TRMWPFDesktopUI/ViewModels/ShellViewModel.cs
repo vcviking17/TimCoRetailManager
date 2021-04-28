@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using TRMWPFDesktopUI.EventModels;
+using TRMWPFDesktopUI.Library.Models;
 
 namespace TRMWPFDesktopUI.ViewModels
 {
@@ -16,13 +17,15 @@ namespace TRMWPFDesktopUI.ViewModels
         private LoginViewModel _loginVM;
         private IEventAggregator _events;
         private SalesViewModel _salesVM;
+        private ILoggedInUserModel _user;
         //private SimpleContainer _container;
 
-        public ShellViewModel(LoginViewModel loginVM, IEventAggregator events, SalesViewModel salesVM, SimpleContainer container)
+        public ShellViewModel(LoginViewModel loginVM, IEventAggregator events, SalesViewModel salesVM, SimpleContainer container, ILoggedInUserModel user)
         {
             _events = events;
             _loginVM = loginVM; //constructor injection
             _salesVM = salesVM;
+            _user = user;
             //_container = container;
 
             _events.Subscribe(this);  //“this” represents the current instance of this class.  You have to tell it who is subscribing (this).
@@ -33,12 +36,43 @@ namespace TRMWPFDesktopUI.ViewModels
             ActivateItem(IoC.Get<LoginViewModel>());  //Do it this way and we don't need the container in dependency injection (Caliburn Micro)
         }
 
+        public void ExitApplication()
+        {
+            TryClose();
+        }
+
+        public void LogOut()
+        {
+            //reset login credentials
+            _user.LogOffUser();
+            //close out everything and activate loginViewModel
+            ActivateItem(IoC.Get<LoginViewModel>());
+            NotifyOfPropertyChange(() => IsLoggedIn);
+        }
+     
+
+        public bool IsLoggedIn
+        {
+            get
+            {
+                bool output = false;
+                if (string.IsNullOrWhiteSpace(_user.Token) == false)
+                {
+                    output = true;
+                }
+
+                return output;
+            }
+            
+        }
+        
         public void Handle(LogOnEvent message)
         {
             ActivateItem(_salesVM); //when we log in, it'll close out the LoginView and open SalesView since we can only have one active item. 
                                     //It doesn't destroy the loginview since the instance is still there _login.  But it would stil have the user
                                     //name and password in it since that's how we left it. 
-            //_loginVM = _container.GetInstance<LoginViewModel>();  //get a new instance of it and put it in _loginVM to wipe out _loginVM without any data
+                                    //_loginVM = _container.GetInstance<LoginViewModel>();  //get a new instance of it and put it in _loginVM to wipe out _loginVM without any data
+            NotifyOfPropertyChange(() => IsLoggedIn);
         }
     }
 }
