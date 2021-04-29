@@ -60,24 +60,43 @@ namespace TimCoreyRetailManagerGood.Library.Internal.DataAccess
             _connection.Open();
 
             _transaction = _connection.BeginTransaction();
+
+            IsClosed = false;
         }
 
+        private bool IsClosed = false;
         public void CommitTransaction()
         {
             //we add the question mark (null check) in case we call it multiple times
             _transaction?.Commit();  //We only call if it succeeds
             _connection?.Close();
+            IsClosed = true;
         }
         public void RollbackTransaction()
         {
             //we add the question mark (null check) in case we call it multiple times
             _transaction?.Rollback();  //We only call if it fails
             _connection?.Close();
+            IsClosed = true;
         }
 
         public void Dispose()
         {
-            //CommitTransaction();
+            if (IsClosed == false)
+            {
+                try
+                {
+                    CommitTransaction();
+                }
+                catch
+                {
+                    //don't so anything...just keep going since it's already closed
+                    //TODO: Log this issue
+                }
+            }
+
+            _transaction = null;
+            _connection = null;
         }
 
         public void SaveDataInTransaction<T>(string storedProcedure, T parameters)
