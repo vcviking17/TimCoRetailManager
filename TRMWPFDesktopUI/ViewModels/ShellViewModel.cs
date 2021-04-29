@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using TRMWPFDesktopUI.EventModels;
+using TRMWPFDesktopUI.Library.Api;
 using TRMWPFDesktopUI.Library.Models;
 
 namespace TRMWPFDesktopUI.ViewModels
@@ -18,14 +19,17 @@ namespace TRMWPFDesktopUI.ViewModels
         private IEventAggregator _events;
         private SalesViewModel _salesVM;
         private ILoggedInUserModel _user;
+        private IAPIHelper _apiHelper;
         //private SimpleContainer _container;
 
-        public ShellViewModel(LoginViewModel loginVM, IEventAggregator events, SalesViewModel salesVM, SimpleContainer container, ILoggedInUserModel user)
+        public ShellViewModel(LoginViewModel loginVM, IEventAggregator events, SalesViewModel salesVM, SimpleContainer container, ILoggedInUserModel user,
+            IAPIHelper apiHelper)
         {
             _events = events;
             _loginVM = loginVM; //constructor injection
             _salesVM = salesVM;
             _user = user;
+            _apiHelper = apiHelper;
             //_container = container;
 
             _events.Subscribe(this);  //“this” represents the current instance of this class.  You have to tell it who is subscribing (this).
@@ -44,7 +48,8 @@ namespace TRMWPFDesktopUI.ViewModels
         public void LogOut()
         {
             //reset login credentials
-            _user.LogOffUser();
+            _user.ResetUserModel();
+            _apiHelper.LogOffUser(); //clear out header 
             //close out everything and activate loginViewModel
             ActivateItem(IoC.Get<LoginViewModel>());
             NotifyOfPropertyChange(() => IsLoggedIn);
