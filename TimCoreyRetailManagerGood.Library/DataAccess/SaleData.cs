@@ -55,23 +55,56 @@ namespace TimCoreyRetailManagerGood.Library.DataAccess
 
             sale.Total = sale.SubTotal + sale.Tax;
 
-            //Save the sales model - create a call to the database
-            SqlDataAccess sql = new SqlDataAccess();
-            sql.SaveData("dbo.sp_Sale_Insert", sale, "TRMData");
-
-            //since sale is passed by reference, the SaleId should be updated on the insert of the db
-            //Get the ID from the sale model
-            int salesId = sql.LoadData<int, dynamic>("dbo.sp_SaleLookup", 
-                new { CashierId = sale.CashierId, SaleDate = sale.SaleDate }, "TRMData").FirstOrDefault();
-            sale.Id = salesId;
-
-            //Finish filling in the sale detail models
-            foreach (var item in details)
+            //with the using, the Dispose will be called at the end automatically
+            //all calls inside will be made together
+            using (SqlDataAccess sql = new SqlDataAccess())
             {
-                item.SaleId = sale.Id;
-                //save the sale detail models
-                sql.SaveData("dbo.sp_SaleDetail_Insert", item, "TRMData");
+                try
+                {
+                    sql.StartTransaction("TRMData");
+                    //Save the sales model - create a call to the database
+                    sql.SaveDataInTransaction("dbo.sp_Sale_Insert", sale);
+
+                    //Get the ID from the sale model
+                    int salesId = sql.LoadDataInTransaction<int, dynamic>("dbo.sp_SaleLookup",
+                        new { CashierId = sale.CashierId, SaleDate = sale.SaleDate }).FirstOrDefault();
+                    sale.Id = salesId;
+
+                    //Finish filling in the sale detail models
+                    foreach (var item in details)
+                    {
+                        item.SaleId = sale.Id;
+                        //save the sale detail models
+                        sql.SaveDataInTransaction("dbo.sp_SaleDetail_Insert", item);
+                    }
+
+                    sql.CommitTransaction();
+                }
+                catch //only need this for debugging to see the message.  (Exception ex)
+                {
+                    sql.RollbackTransaction();
+                    throw;  //this will throw the original exception and not one we define
+                }                
             }
+
+            /////as it was before transaction start
+            //Save the sales model - create a call to the database
+            //SqlDataAccess sql = new SqlDataAccess();
+            //sql.SaveData("dbo.sp_Sale_Insert", sale, "TRMData");
+
+            ////Get the ID from the sale model
+            //int salesId = sql.LoadData<int, dynamic>("dbo.sp_SaleLookup", 
+            //    new { CashierId = sale.CashierId, SaleDate = sale.SaleDate }, "TRMData").FirstOrDefault();
+            //sale.Id = salesId;
+
+            ////Finish filling in the sale detail models
+            //foreach (var item in details)
+            //{
+            //    item.SaleId = sale.Id;
+            //    //save the sale detail models
+            //    sql.SaveData("dbo.sp_SaleDetail_Insert", item, "TRMData");
+            //}
+            /////as it was before transaction end
         }
     }
 }
