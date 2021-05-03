@@ -106,5 +106,14 @@ namespace TimCoreyRetailManagerGood.Library.DataAccess
             //}
             /////as it was before transaction end
         }
+
+        public List<SaleReportModel> GetSalesReport()
+        {
+            SqlDataAccess sql = new SqlDataAccess();
+
+            var output = sql.LoadData<SaleReportModel, dynamic>("dbo.sp_Sale_SaleReport", new { }, "TRMData");
+
+            return output;
+        }
     }
 }
