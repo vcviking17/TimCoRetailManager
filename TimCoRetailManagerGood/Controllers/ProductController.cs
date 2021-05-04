@@ -9,7 +9,7 @@ using TimCoreyRetailManagerGood.Library.Models;
 
 namespace TimCoRetailManagerGood.Controllers
 {
-    [Authorize(Roles = "Cashier,Manager,Admin")]
+    [Authorize(Roles = "Cashier")]
     public class ProductController : ApiController
     {
         [HttpGet]

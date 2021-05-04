@@ -3,9 +3,11 @@ using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using TRMWPFDesktopUI.Library.Api;
 using TRMWPFDesktopUI.Library.Helpers;
 using TRMWPFDesktopUI.Library.Models;
@@ -19,22 +21,57 @@ namespace TRMWPFDesktopUI.ViewModels
         ISaleEndpoint _saleEndpoint;
         IConfigHelper _configHelper;
         IMapper _mapper;
+        private readonly StatusInfoViewModel _status;
+        private readonly IWindowManager _window;
 
         public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint,
-            IMapper mapper)
+            IMapper mapper, StatusInfoViewModel status ,IWindowManager window)
         {
             //on the contructor, load the items from dependency injection system
             _productEndpoint = productEndpoint;
             _configHelper = configHelper;
             _saleEndpoint = saleEndpoint;
             _mapper = mapper;
+            _status = status;
+            _window = window;
         }
 
         //event for when the view is loaded
         protected override async void OnViewLoaded(object view)
         {
             base.OnViewLoaded(view);
-            await LoadProducts(); //load products when the view is loaded
+            try
+            {
+                await LoadProducts(); //load products when the view is loaded
+            }
+            catch (Exception ex)
+            {
+                //throw;
+                //We want the Sales page to close down and alert the user (MessageBox)
+
+                //create a dynamic list of settings
+                dynamic settings = new ExpandoObject();
+                settings.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                settings.ResizeMode = ResizeMode.NoResize;
+                settings.Title = "System Error";
+
+                if (ex.Message == "Unauthorized")
+                {
+                    _status.UpdateMessage("Unauthorized Access", "You do not have permission to interact with the Sales Form");
+                    _window.ShowDialog(_status, null, settings);  //show the _status window as popup (window dislag)
+                }
+                else
+                {
+                    _status.UpdateMessage("Fatal Exception", ex.Message);
+                    _window.ShowDialog(_status, null, settings);  //show the _status window as popup (window dislag)
+                }
+
+                //we can show a second dialog by repeating the calls
+                //_status.UpdateMessage("Unauthorized Access", "You do not have permission to interact with the Sales Form");
+                //_window.ShowDialog(_status, null, settings);  //show the _status window as popup (window dislag)
+
+                TryClose(); //after they close the dialog box, close the sales form:
+            }
         }
         private async Task LoadProducts()
         {
