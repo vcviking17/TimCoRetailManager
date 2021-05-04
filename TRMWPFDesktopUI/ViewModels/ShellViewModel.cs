@@ -45,6 +45,12 @@ namespace TRMWPFDesktopUI.ViewModels
             TryClose();
         }
 
+        public void UserManagement()
+        {
+            //close out everything and activate UserDisplayviewModel
+            ActivateItem(IoC.Get<UserDisplayViewModel>());
+        }
+
         public void LogOut()
         {
             //reset login credentials

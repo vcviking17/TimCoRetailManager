@@ -56,7 +56,8 @@ namespace TRMWPFDesktopUI
             //whenever we ask for a container instance, it will return the instance
             _container.Instance(_container)
                 .PerRequest<IProductEndpoint, ProductEndpoint>()
-                .PerRequest<ISaleEndpoint, SaleEndpoint>();
+                .PerRequest<ISaleEndpoint, SaleEndpoint>()
+                .PerRequest<IUserEndpoint, UserEndpoint>();
             //handle the idea of bringing windows in and out
             //can pass event messaging throughout the aplpication.
             //One piece can raise and event and another piece can react to it. 
