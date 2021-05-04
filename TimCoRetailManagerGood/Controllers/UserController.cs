@@ -9,7 +9,7 @@ using TimCoreyRetailManagerGood.Library.Models;
 
 namespace TimCoRetailManagerGood.Controllers
 {
-    [Authorize]
+    [Authorize] //This has to be everyone since we call this to see who is logged in
     [RoutePrefix("api/User")]
     public class UserController : ApiController
     {   

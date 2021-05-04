@@ -13,6 +13,7 @@ namespace TimCoRetailManagerGood.Controllers
     [Authorize]
     public class SaleController : ApiController
     {
+        [Authorize(Roles = "Cashier")]
         public void Post(SaleModel sale)
         {
             SaleData data = new SaleData();
@@ -21,9 +22,21 @@ namespace TimCoRetailManagerGood.Controllers
             data.SaveSale(sale, userId);
         }
 
+        [Authorize(Roles = "Admin,Manager")]
         [Route("GetSalesReport")]
         public List<SaleReportModel> GetSalesReport()
         {
+            bool isAdmin = RequestContext.Principal.IsInRole("Admin");
+            bool isManager = RequestContext.Principal.IsInRole("Manager");
+            if (isAdmin)
+            {
+                //do admin stuff
+            }
+            else if (isManager)
+            {
+                //do manager stuff
+            }
+
             SaleData data = new SaleData();
             return data.GetSalesReport();
         }
