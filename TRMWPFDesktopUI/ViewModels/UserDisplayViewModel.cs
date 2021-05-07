@@ -40,6 +40,88 @@ namespace TRMWPFDesktopUI.ViewModels
             }
         }
 
+        private UserModel _selectedUser;
+
+        public UserModel SelectedUser
+        {
+            get { return _selectedUser; }
+            set 
+            { 
+                _selectedUser = value;
+                SelectedUserName = value.Email;
+                UserRoles.Clear();
+                //create a new binding list from the list of strings (roles.select)
+                UserRoles = new BindingList<string>(value.Roles.Select(x => x.Value).ToList());
+                LoadRoles(); //can't await in a property, but it works.  Will change later. 
+                NotifyOfPropertyChange(() => SelectedUser);
+            }
+        }
+
+        private string _selectedUserRole;
+
+        public string SelectedUserRole
+        {
+            get { return _selectedUserRole; }
+            set
+            {
+                _selectedUserRole = value;
+                NotifyOfPropertyChange(() => _selectedUserRole);
+            }
+        }
+
+        private string _selectedAvailableRole;
+
+        public string SelectedAvailableRole
+        {
+            get { return _selectedAvailableRole; }
+            set
+            {
+                _selectedAvailableRole = value;
+                NotifyOfPropertyChange(() => SelectedAvailableRole);
+            }
+        }
+
+        private string _selectedUserName;
+
+        public string SelectedUserName
+        {
+            get 
+            { 
+                return _selectedUserName; 
+            }
+            set 
+            { 
+                _selectedUserName = value;
+                NotifyOfPropertyChange(() => SelectedUserName);
+            }
+        }
+
+        private BindingList<string> _UserRoles = new BindingList<string>();
+
+        public BindingList<string> UserRoles
+        {
+            get { return _UserRoles; }
+            set 
+            {
+                _UserRoles = value;
+                NotifyOfPropertyChange(() => UserRoles);
+            }
+        }
+
+        private BindingList<string> _availableRoles = new BindingList<string>();
+
+        public BindingList<string> AvailableRoles
+        {
+            get { return _availableRoles; }
+            set
+            {
+                _availableRoles = value;
+                //we only want to show what roles the user doesn't have
+
+                NotifyOfPropertyChange(() => AvailableRoles);
+            }
+        }
+
         //we want to wait until the view loads before starting since it's async
         protected override async void OnViewLoaded(object view)
         {
@@ -81,6 +163,35 @@ namespace TRMWPFDesktopUI.ViewModels
         {
             var userList = await _userEndpoint.GetAll();  //returns a list of UserModel
             Users = new BindingList<UserModel>(userList);
+        }
+
+        private async Task LoadRoles()
+        {
+            var roles = await _userEndpoint.GetAllRoles();
+            foreach (var role in roles)
+            {
+                //indexof returns -1 if it doesn't find it.
+                if (UserRoles.IndexOf(role.Value) < 0) 
+                {
+                    AvailableRoles.Add(role.Value);
+                }
+            }
+        }
+
+        public async Task AddSelectedRole()
+        {
+            await _userEndpoint.AddUserToRole(SelectedUser.Id, SelectedAvailableRole);
+            //change the lists to account for the added role
+            UserRoles.Add(SelectedAvailableRole);
+            AvailableRoles.Remove(SelectedAvailableRole);
+        }
+
+        public async Task RemoveSelectedRole()
+        {
+            await _userEndpoint.RemoveUserFromRole(SelectedUser.Id, SelectedUserRole);
+            //change the lists to account for the added role;
+            AvailableRoles.Add(SelectedUserRole);
+            UserRoles.Remove(SelectedUserRole);
         }
     }
 }

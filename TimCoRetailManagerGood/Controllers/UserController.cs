@@ -14,7 +14,7 @@ namespace TimCoRetailManagerGood.Controllers
     [Authorize] //This has to be everyone since we call this to see who is logged in
     [RoutePrefix("api/User")]
     public class UserController : ApiController
-    {   
+    {
         [HttpGet]
         public UserModel GetById()
         {
@@ -29,7 +29,7 @@ namespace TimCoRetailManagerGood.Controllers
             return data.GetUserById(userId).First();
 
         }
-        
+
         [Authorize(Roles = "Admin")]
         [HttpGet]
         [Route("Admin/GetAllUsers")]
@@ -56,14 +56,57 @@ namespace TimCoRetailManagerGood.Controllers
                     foreach (var r in user.Roles)
                     {
                         //grab from the dictionary (LINQ)
-                        u.Roles.Add(r.RoleId,roles.Where(x => x.Id == r.RoleId).First().Name);
+                        u.Roles.Add(r.RoleId, roles.Where(x => x.Id == r.RoleId).First().Name);
                     }
                     output.Add(u);
                 }
             }
             return output;
-            
+
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        [Route("Admin/GetAllRoles")]
+        public Dictionary<string, string> GetAllRoles()
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                //same as above, but convert it to the dictionary
+                //lambda expression
+                var roles = context.Roles.ToDictionary(x => x.Id, x => x.Name);
+
+                return roles;
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [Route("Admin/AddRole")]
+        public void AddARole(UserRolePairModel pairing)
+        {
+            //from above as a template
+            using (var context = new ApplicationDbContext())
+            {
+                var userStore = new UserStore<ApplicationUser>(context);
+                var userManager = new UserManager<ApplicationUser>(userStore);
+
+                userManager.AddToRole(pairing.UserId, pairing.RoleName);
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [Route("Admin/RemoveRole")]
+        public void RemoveARole(UserRolePairModel pairing)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var userStore = new UserStore<ApplicationUser>(context);
+                var userManager = new UserManager<ApplicationUser>(userStore);
+
+                userManager.RemoveFromRole(pairing.UserId, pairing.RoleName);
+            }
         }
     }
-
 }
