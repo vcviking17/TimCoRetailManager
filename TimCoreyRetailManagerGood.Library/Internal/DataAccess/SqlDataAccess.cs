@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -12,10 +13,19 @@ namespace TimCoreyRetailManagerGood.Library.Internal.DataAccess
 {
     internal class SqlDataAccess : IDisposable
     {
+        //add constructor when fixing configuration for connection string
+        public SqlDataAccess(IConfiguration config)
+        {            
+            this.config = config;
+        }
+
         public string GetConnectionString(string name)
         {
-            //from Web.Config
-            return ConfigurationManager.ConnectionStrings[name].ConnectionString;
+            //from Web.Config .NET framework
+            //return ConfigurationManager.ConnectionStrings[name].ConnectionString;
+            //for debugging only
+            //return @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=TRMData;Integrated Security=True;Connect Timeout=60;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"; 
+            return this.config.GetConnectionString(name);
         }
 
         //load data from the database
@@ -65,6 +75,8 @@ namespace TimCoreyRetailManagerGood.Library.Internal.DataAccess
         }
 
         private bool IsClosed = false;
+        private readonly IConfiguration config;
+
         public void CommitTransaction()
         {
             //we add the question mark (null check) in case we call it multiple times

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,11 +23,14 @@ namespace TRMApi.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _config;
 
-        public UserController(ApplicationDbContext context, UserManager<IdentityUser> usermanger)
+        public UserController(ApplicationDbContext context, UserManager<IdentityUser> usermanger, 
+            IConfiguration config)
         {
             _context = context;
             _userManager = usermanger;
+            _config = config;
         }
 
         [HttpGet]
@@ -35,7 +39,7 @@ namespace TRMApi.Controllers
             //get the information about the user
             //string userId = RequestContext.Principal.Identity.GetUserId();  //string userId = RequestContext.Principal.Identity.GetUserId();
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            UserData data = new UserData();
+            UserData data = new UserData(_config);
 
             //The model is from the data access.
             //We will have a different display model for the API that
