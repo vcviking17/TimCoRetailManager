@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using TRMWPFDesktopUI.EventModels;
@@ -32,32 +33,32 @@ namespace TRMWPFDesktopUI.ViewModels
             _apiHelper = apiHelper;
             //_container = container;
 
-            _events.Subscribe(this);  //“this” represents the current instance of this class.  You have to tell it who is subscribing (this).
+            _events.SubscribeOnPublishedThread(this);  //“this” represents the current instance of this class.  You have to tell it who is subscribing (this).
                                       //When an event happens, I’m going to send the event to subscribers, even if they aren’t listening for that event. 
 
             // ActivateItem(_loginVM); //activate the login on the ShellView
             //ActivateItem(_container.GetInstance<LoginViewModel>());  //get a new instance of it and put it in _loginVM to wipe out _loginVM without any data
-            ActivateItem(IoC.Get<LoginViewModel>());  //Do it this way and we don't need the container in dependency injection (Caliburn Micro)
+            ActivateItemAsync(IoC.Get<LoginViewModel>(), new CancellationToken());  //Do it this way and we don't need the container in dependency injection (Caliburn Micro)
         }
 
         public void ExitApplication()
         {
-            TryClose();
+            TryCloseAsync();
         }
 
-        public void UserManagement()
+        public async Task UserManagement()
         {
             //close out everything and activate UserDisplayviewModel
-            ActivateItem(IoC.Get<UserDisplayViewModel>());
+            await ActivateItemAsync(IoC.Get<UserDisplayViewModel>(), new CancellationToken());
         }
 
-        public void LogOut()
+        public async Task LogOut()
         {
             //reset login credentials
             _user.ResetUserModel();
             _apiHelper.LogOffUser(); //clear out header 
             //close out everything and activate loginViewModel
-            ActivateItem(IoC.Get<LoginViewModel>());
+            await ActivateItemAsync(IoC.Get<LoginViewModel>(), new CancellationToken());
             NotifyOfPropertyChange(() => IsLoggedIn);
         }
      
@@ -76,10 +77,11 @@ namespace TRMWPFDesktopUI.ViewModels
             }
             
         }
-        
-        public void Handle(LogOnEvent message)
+
+        //public void Handle(LogOnEvent message)
+        public async Task HandleAsync(LogOnEvent message, CancellationToken cancellationToken)
         {
-            ActivateItem(_salesVM); //when we log in, it'll close out the LoginView and open SalesView since we can only have one active item. 
+            await ActivateItemAsync(_salesVM, cancellationToken); //when we log in, it'll close out the LoginView and open SalesView since we can only have one active item. 
                                     //It doesn't destroy the loginview since the instance is still there _login.  But it would stil have the user
                                     //name and password in it since that's how we left it. 
                                     //_loginVM = _container.GetInstance<LoginViewModel>();  //get a new instance of it and put it in _loginVM to wipe out _loginVM without any data

@@ -23,7 +23,7 @@ namespace TRMWPFDesktopUI.ViewModels
 
         public void Close()  //Close button on the form
         {
-            TryClose();  //close the existing form...not the whole application (this.close would do the whole application)
+            TryCloseAsync();  //close the existing form...not the whole application (this.close would do the whole application)
         }
     }
 }

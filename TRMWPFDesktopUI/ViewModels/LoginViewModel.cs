@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TRMWPFDesktopUI.EventModels;
 using TRMWPFDesktopUI.Helpers;
@@ -103,7 +104,7 @@ namespace TRMWPFDesktopUI.ViewModels
                 //capture more information about the user. 
                 await _apiHelper.GetLoggedInUserInfo(result.Access_Token);
 
-                _events.PublishOnUIThread(new LogOnEvent());//this broadcasts the event.
+                await _events.PublishOnUIThreadAsync(new LogOnEvent(), new CancellationToken());//this broadcasts the event.
             }
             catch (Exception ex)
             {

@@ -144,19 +144,19 @@ namespace TRMWPFDesktopUI.ViewModels
                 if (ex.Message == "Unauthorized")
                 {
                     _status.UpdateMessage("Unauthorized Access", "You do not have permission to interact with the Sales Form");
-                    _window.ShowDialog(_status, null, settings);  //show the _status window as popup (window dislag)
+                    await _window.ShowDialogAsync(_status, null, settings);  //show the _status window as popup (window dislag)
                 }
                 else
                 {
                     _status.UpdateMessage("Fatal Exception", ex.Message);
-                    _window.ShowDialog(_status, null, settings);  //show the _status window as popup (window dislag)
+                    await _window.ShowDialogAsync(_status, null, settings);  //show the _status window as popup (window dislag)
                 }
 
                 //we can show a second dialog by repeating the calls
                 //_status.UpdateMessage("Unauthorized Access", "You do not have permission to interact with the Sales Form");
                 //_window.ShowDialog(_status, null, settings);  //show the _status window as popup (window dislag)
 
-                TryClose(); //after they close the dialog box, close the sales form:
+                TryCloseAsync(); //after they close the dialog box, close the sales form:
             }
         }
         private async Task LoadUsers()
