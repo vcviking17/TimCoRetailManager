@@ -79,12 +79,15 @@ namespace TRMWPFDesktopUI.ViewModels
         }
 
         //public void Handle(LogOnEvent message)
+        //this handle happens with the LogIn event as seen at the top.
         public async Task HandleAsync(LogOnEvent message, CancellationToken cancellationToken)
         {
-            await ActivateItemAsync(_salesVM, cancellationToken); //when we log in, it'll close out the LoginView and open SalesView since we can only have one active item. 
-                                    //It doesn't destroy the loginview since the instance is still there _login.  But it would stil have the user
-                                    //name and password in it since that's how we left it. 
-                                    //_loginVM = _container.GetInstance<LoginViewModel>();  //get a new instance of it and put it in _loginVM to wipe out _loginVM without any data
+            await ActivateItemAsync(IoC.Get<SalesViewModel>(), cancellationToken); //when we log in, it'll close out the LoginView and open SalesView since we can only have one active item. 
+                                                                  //It doesn't destroy the loginview since the instance is still there _login.  But it would stil have the user
+                                                                  //name and password in it since that's how we left it. 
+                                                                  //_loginVM = _container.GetInstance<LoginViewModel>();  //get a new instance of it and put it in _loginVM to wipe out _loginVM without any data
+            //await ActivateItemAsync(_salesVM, cancellationToken);  //couldn't use this since it uses the same SalesViewModel instesad of a new one when logging in.
+            //In effect, the cart is still populated if you log off when items are in the cart. 
             NotifyOfPropertyChange(() => IsLoggedIn);
         }
     }
