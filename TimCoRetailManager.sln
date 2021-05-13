@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimCoRetailManagerGood", "T
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "TRMData", "TRMData\TRMData.sqlproj", "{4A2EC9A8-157C-407B-B593-15FBC7B4D5DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TRMWPFDesktopUI", "TRMWPFDesktopUI\TRMWPFDesktopUI.csproj", "{3CB9BD2D-8C23-4CC8-9EA5-98416317915D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TRMWPFDesktopUI", "TRMWPFDesktopUI\TRMWPFDesktopUI.csproj", "{3CB9BD2D-8C23-4CC8-9EA5-98416317915D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TimCoreyRetailManagerGood.Library", "TimCoreyRetailManagerGood.Library\TimCoreyRetailManagerGood.Library.csproj", "{6B795217-4E65-4065-9517-F65B67528D3E}"
 EndProject
@@ -19,7 +19,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{D1930D6D-C3E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WPF", "WPF", "{269C6141-FEB1-4282-8229-E684C69C458D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TRMApi", "TRMApi\TRMApi.csproj", "{6BEDA495-BEB0-4183-B602-4B7676F86431}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TRMApi", "TRMApi\TRMApi.csproj", "{6BEDA495-BEB0-4183-B602-4B7676F86431}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EBB8C6C4-54FA-4715-AE3B-87F795F30CFD}"
+	ProjectSection(SolutionItems) = preProject
+		RoadMap.txt = RoadMap.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

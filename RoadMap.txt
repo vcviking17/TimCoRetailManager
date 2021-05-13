@@ -1,0 +1,48 @@
+﻿Application Ideas:
+
+•	Actually interact with the inventory.
+o		Inventory coming in and out
+
+•	Move API to Azure
+o		API will go to a free tier
+o		SQL server will not be free ($5 per month).  We don’t have to do the actual move, but can watch how to deploy to our own server
+
+•	CI/CD Process
+o		Continuous Integration/Continuous Deployment
+o		CI  When I check in code, it gets built and tested.  Unit tests all pass.
+o		CD  When I check in code, it will be deployed somewhere to be tested. 
+o		Application Lifecycle course has a lot more detail.
+
+•	Deploy Desktop App to Azure Blob Storage for download
+o		Razor page attached to API with download link for our application
+o		Build the exe and will upload compiled exe to blob storage with a link to download it
+
+•	Introduce a web-based inventory control system (Blazor?)
+
+•	Web-based reporting
+
+•	A Xamarin Forms app for a mobile register
+o		Clerk can be mobile and not just at a counter. 
+
+Phase 2 Roadmap:
+
+1.	Take advantage of .NET Core
+a.		Dependency injection in API project in controllers
+b.		Logging
+c.		Application Insights (Azure tool)
+
+2.	Set up a simple task board in Azure DevOps
+
+3.	CI/CD Process with Azure DevOps
+a.		Move source code to Azure DevOps?
+i.			Azure DevOps can use Git, so we don’t have to move it
+
+4.	Move the API to Azure
+
+5.	Move the database to Azure SQL
+a.		Part of the CD process
+
+6.	Deploy the desktop app to Azure Blob Storage
+a.		Container that stores files
+
+6.	Web-based inventory control system
