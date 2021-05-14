@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,14 +26,16 @@ namespace TRMApi.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _config;
         private readonly IUserData _userData;
+        private readonly ILogger<UserController> _logger;
 
         public UserController(ApplicationDbContext context, UserManager<IdentityUser> usermanger, 
-            IConfiguration config, IUserData userData)
+            IConfiguration config, IUserData userData, ILogger<UserController> logger)
         {
             _context = context;
             _userManager = usermanger;
             _config = config;
             _userData = userData;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -128,8 +131,17 @@ namespace TRMApi.Controllers
             //userManager.AddToRoleAsync(pairing.UserId, pairing.RoleName);
 
             //}
+            string loggedInUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);  //from GetByUserId
+            var loggedInUser = _userData.GetUserById(loggedInUserId).First();
+
             var user = await _userManager.FindByIdAsync(pairing.UserId);
+            _logger.LogInformation("Admin {Admin} added user {User} to role {Role}",
+                loggedInUserId, user.Id, pairing.RoleName); 
+            //use the structured logging to make searching by user easier for example; not string interpolation
+
             await _userManager.AddToRoleAsync(user, pairing.RoleName);
+
+            
         }
 
         [Authorize(Roles = "Admin")]
@@ -145,7 +157,14 @@ namespace TRMApi.Controllers
             //    userManager.RemoveFromRoleAsync(pairing.UserId, pairing.RoleName);
             //}
 
+            string loggedInUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);  //from GetByUserId
+            var loggedInUser = _userData.GetUserById(loggedInUserId).First();
+
             var user = await _userManager.FindByIdAsync(pairing.UserId);
+
+            _logger.LogInformation("Admin {Admin} removed user {User} from role {Role}",
+                loggedInUserId, user.Id, pairing.RoleName);
+
             await _userManager.RemoveFromRoleAsync(user, pairing.RoleName);
         }
     }
