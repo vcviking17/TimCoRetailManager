@@ -17,19 +17,24 @@ namespace TRMApi.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IConfiguration _config;
+        private readonly IProductData _productData;
 
-        public ProductController(IConfiguration config)
+        public ProductController(IConfiguration config, IProductData productData)
         {
             _config = config;
+            _productData = productData;
         }
 
         [HttpGet]
         // GET api/values
         public List<ProductModel> Get()
         {
-            ProductData data = new ProductData(_config);
+            //before dependency injection
+            //ProductData data = new ProductData(_config);
+            //return data.GetProducts();
 
-            return data.GetProducts();
+            //after dependency injection
+            return _productData.GetProducts();
         }
     }
 }

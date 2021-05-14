@@ -9,23 +9,27 @@ using TimCoreyRetailManagerGood.Library.Models;
 
 namespace TimCoreyRetailManagerGood.Library.DataAccess
 {
-    public class UserData
+    public class UserData : IUserData
     {
         private readonly IConfiguration _config;
+        private readonly ISqlDataAccess _sql;
 
-        public UserData(IConfiguration config)
+        public UserData(IConfiguration config, ISqlDataAccess sql)
         {
             _config = config;
+            _sql = sql;
         }
-        public List<UserModel> GetUserById (string Id)
+        public List<UserModel> GetUserById(string Id)
         {
-            SqlDataAccess sql = new SqlDataAccess(_config);
+            //pre dependency injection
+            //SqlDataAccess sql = new SqlDataAccess(_config);
 
             var p = new { Id = Id };
 
             //we have to specifiy the list type since it's a T, U
             //dynamic is a trick we can use since it's the same assembly
-            var output = sql.LoadData<UserModel, dynamic>("dbo.spUserLookup", p, "TRMData");
+            //var output = sql.LoadData<UserModel, dynamic>("dbo.spUserLookup", p, "TRMData");
+            var output = _sql.LoadData<UserModel, dynamic>("dbo.spUserLookup", p, "TRMData");
 
             return output;
         }

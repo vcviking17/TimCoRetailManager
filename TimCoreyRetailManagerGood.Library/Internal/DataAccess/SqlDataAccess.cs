@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace TimCoreyRetailManagerGood.Library.Internal.DataAccess
 {
-    internal class SqlDataAccess : IDisposable
+    public class SqlDataAccess : IDisposable, ISqlDataAccess
     {
         //add constructor when fixing configuration for connection string
         public SqlDataAccess(IConfiguration config)
-        {            
+        {
             this.config = config;
         }
 
@@ -29,14 +29,14 @@ namespace TimCoreyRetailManagerGood.Library.Internal.DataAccess
         }
 
         //load data from the database
-        public List<T> LoadData<T,U>(string storedProcedure, U parameters, string connectionStringName)
+        public List<T> LoadData<T, U>(string storedProcedure, U parameters, string connectionStringName)
         {
             string connectionString = GetConnectionString(connectionStringName);
 
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
                 //take the connection to the database and does the query.  
-                List<T> rows = connection.Query<T>(storedProcedure, parameters, 
+                List<T> rows = connection.Query<T>(storedProcedure, parameters,
                     commandType: CommandType.StoredProcedure).ToList();
                 return rows;
             }
@@ -112,11 +112,11 @@ namespace TimCoreyRetailManagerGood.Library.Internal.DataAccess
         }
 
         public void SaveDataInTransaction<T>(string storedProcedure, T parameters)
-        {               
+        {
             //taken from SaveData above
             //associate the transaction with the call. 
             _connection.Execute(storedProcedure, parameters,
-                    commandType: CommandType.StoredProcedure, transaction: _transaction);            
+                    commandType: CommandType.StoredProcedure, transaction: _transaction);
         }
 
         public List<T> LoadDataInTransaction<T, U>(string storedProcedure, U parameters)
@@ -128,5 +128,5 @@ namespace TimCoreyRetailManagerGood.Library.Internal.DataAccess
             return rows;
         }
 
-    }    
+    }
 }

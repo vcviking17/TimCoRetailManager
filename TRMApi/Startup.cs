@@ -16,6 +16,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using TimCoreyRetailManagerGood.Library.DataAccess;
+using TimCoreyRetailManagerGood.Library.Internal.DataAccess;
 
 namespace TRMApi
 {
@@ -39,6 +41,17 @@ namespace TRMApi
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            //Personal services
+            //We create this tool in the very top.  Ask for an IInventory and it creates an Inventorydata.
+            //Then we don't need a "new InventoryData()" multiple times in the class
+            services.AddTransient<IInventoryData, InventoryData>(); //new instance every time we ask for it
+            services.AddTransient<ISqlDataAccess, SqlDataAccess>();
+            services.AddTransient<IProductData, ProductData>();
+            services.AddTransient<ISaleData, SaleData>();
+            services.AddTransient<IUserData, UserData>();
+
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = "JwtBearer";

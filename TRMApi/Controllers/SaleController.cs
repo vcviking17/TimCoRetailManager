@@ -18,21 +18,24 @@ namespace TRMApi.Controllers
     public class SaleController : ControllerBase
     {
         private readonly IConfiguration _config;
+        private readonly ISaleData _saleData;
 
-        public SaleController(IConfiguration config)
+        public SaleController(IConfiguration config, ISaleData saleData)
         {
             _config = config;
+            _saleData = saleData;
         }
 
         [Authorize(Roles = "Cashier")]
         [HttpPost]
         public void Post(SaleModel sale)
         {
-            SaleData data = new SaleData(_config);
+            //SaleData data = new SaleData(_config);
             //string userId = RequestContext.Principal.Identity.GetUserId();  old way in .NET Framework
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            data.SaveSale(sale, userId);
+            //data.SaveSale(sale, userId);
+            _saleData.SaveSale(sale, userId);
         }
 
         [Authorize(Roles = "Admin,Manager")]
@@ -51,8 +54,9 @@ namespace TRMApi.Controllers
             //    //do manager stuff
             //}
 
-            SaleData data = new SaleData(_config);
-            return data.GetSalesReport();
+            //SaleData data = new SaleData(_config);
+            //return data.GetSalesReport();
+            return _saleData.GetSalesReport();
         }
     }
 }

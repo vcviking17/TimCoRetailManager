@@ -24,13 +24,15 @@ namespace TRMApi.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _config;
+        private readonly IUserData _userData;
 
         public UserController(ApplicationDbContext context, UserManager<IdentityUser> usermanger, 
-            IConfiguration config)
+            IConfiguration config, IUserData userData)
         {
             _context = context;
             _userManager = usermanger;
             _config = config;
+            _userData = userData;
         }
 
         [HttpGet]
@@ -39,13 +41,15 @@ namespace TRMApi.Controllers
             //get the information about the user
             //string userId = RequestContext.Principal.Identity.GetUserId();  //string userId = RequestContext.Principal.Identity.GetUserId();
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            UserData data = new UserData(_config);
+            //pre dependency injection
+            //UserData data = new UserData(_config);
 
             //The model is from the data access.
             //We will have a different display model for the API that
             //may have different display for example. 
             //We don't want display models in data access models. 
-            return data.GetUserById(userId).First();
+            //return data.GetUserById(userId).First();
+            return _userData.GetUserById(userId).First();
 
         }
 

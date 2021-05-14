@@ -9,18 +9,22 @@ using TimCoreyRetailManagerGood.Library.Models;
 
 namespace TimCoreyRetailManagerGood.Library.DataAccess
 {
-    public class SaleData
+    public class SaleData : ISaleData
     {
         private readonly IConfiguration _config;
+        private readonly IProductData _productData;
+        private readonly ISqlDataAccess _sql;
 
-        public SaleData(IConfiguration config)
+        public SaleData(IConfiguration config, IProductData productData, ISqlDataAccess sql)
         {
             _config = config;
+            _productData = productData;
+            _sql = sql;
         }
         public void SaveSale(SaleModel saleinfo, string cashierId)
         {
-
-            ProductData products = new ProductData(_config);
+            //pre dependency injection
+            //ProductData products = new ProductData(_config);
             var taxRate = ConfigHelper.GetTaxRate() / 100;
 
             //TODO:  Make this SOLID/DRY/Better
@@ -35,7 +39,10 @@ namespace TimCoreyRetailManagerGood.Library.DataAccess
                 };
 
                 //Get the information about this product via database call
-                var productInfo = products.GetProductById(item.ProductId);
+                //pre dependency injection
+                //var productInfo = products.GetProductById(item.ProductId);
+                //with dependency injection
+                var productInfo = _productData.GetProductById(item.ProductId);
 
                 //if it's not in the database
                 if (productInfo == null)
@@ -49,7 +56,7 @@ namespace TimCoreyRetailManagerGood.Library.DataAccess
                 {
                     detail.Tax = (detail.PurchasePrice * taxRate);
                 }
-                
+
                 details.Add(detail);
             }
             //Create the Sale Model
@@ -64,35 +71,45 @@ namespace TimCoreyRetailManagerGood.Library.DataAccess
 
             //with the using, the Dispose will be called at the end automatically
             //all calls inside will be made together
-            using (SqlDataAccess sql = new SqlDataAccess(_config))
+            //pre dependency injection needs the using statement for disposal.
+            //With dependency injection, we don't need the using statement since
+            //dependency injection handles disposal
+            //using (SqlDataAccess sql = new SqlDataAccess(_config))
+            //{
+            try
             {
-                try
-                {
-                    sql.StartTransaction("TRMData");
-                    //Save the sales model - create a call to the database
-                    sql.SaveDataInTransaction("dbo.sp_Sale_Insert", sale);
+                //sql.StartTransaction("TRMData");
+                _sql.StartTransaction("TRMData");
+                //Save the sales model - create a call to the database
+                //sql.SaveDataInTransaction("dbo.sp_Sale_Insert", sale);
+                _sql.SaveDataInTransaction("dbo.sp_Sale_Insert", sale);
 
-                    //Get the ID from the sale model
-                    int salesId = sql.LoadDataInTransaction<int, dynamic>("dbo.sp_SaleLookup",
+                //Get the ID from the sale model
+                //int salesId = sql.LoadDataInTransaction<int, dynamic>("dbo.sp_SaleLookup",
+                //        new { CashierId = sale.CashierId, SaleDate = sale.SaleDate }).FirstOrDefault();
+                int salesId = _sql.LoadDataInTransaction<int, dynamic>("dbo.sp_SaleLookup",
                         new { CashierId = sale.CashierId, SaleDate = sale.SaleDate }).FirstOrDefault();
-                    sale.Id = salesId;
+                sale.Id = salesId;
 
-                    //Finish filling in the sale detail models
-                    foreach (var item in details)
-                    {
-                        item.SaleId = sale.Id;
-                        //save the sale detail models
-                        sql.SaveDataInTransaction("dbo.sp_SaleDetail_Insert", item);
-                    }
-
-                    sql.CommitTransaction();
-                }
-                catch //only need this for debugging to see the message.  (Exception ex)
+                //Finish filling in the sale detail models
+                foreach (var item in details)
                 {
-                    sql.RollbackTransaction();
-                    throw;  //this will throw the original exception and not one we define
-                }                
+                    item.SaleId = sale.Id;
+                    //save the sale detail models
+                    //sql.SaveDataInTransaction("dbo.sp_SaleDetail_Insert", item);
+                    _sql.SaveDataInTransaction("dbo.sp_SaleDetail_Insert", item);
+                }
+
+                //sql.CommitTransaction();
+                _sql.CommitTransaction();
             }
+            catch //only need this for debugging to see the message.  (Exception ex)
+            {
+                //sql.RollbackTransaction();
+                _sql.RollbackTransaction();
+                throw;  //this will throw the original exception and not one we define
+            }
+            //}
 
             /////as it was before transaction start
             //Save the sales model - create a call to the database
@@ -116,9 +133,12 @@ namespace TimCoreyRetailManagerGood.Library.DataAccess
 
         public List<SaleReportModel> GetSalesReport()
         {
-            SqlDataAccess sql = new SqlDataAccess(_config);
+            //pre dependency injection
+            //SqlDataAccess sql = new SqlDataAccess(_config);
+            //var output = sql.LoadData<SaleReportModel, dynamic>("dbo.sp_Sale_SaleReport", new { }, "TRMData");
 
-            var output = sql.LoadData<SaleReportModel, dynamic>("dbo.sp_Sale_SaleReport", new { }, "TRMData");
+            //with dependency injection
+            var output = _sql.LoadData<SaleReportModel, dynamic>("dbo.sp_Sale_SaleReport", new { }, "TRMData");
 
             return output;
         }
